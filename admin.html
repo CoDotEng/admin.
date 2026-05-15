@@ -22,7 +22,7 @@
             color: var(--text-main);
             display: flex; 
             justify-content: center; 
-            align-items: flex-start; /* Changed to flex-start for scrolling */
+            align-items: flex-start;
             min-height: 100vh; 
             margin: 0;
             padding: 40px 20px;
@@ -34,7 +34,7 @@
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.05); 
             width: 100%; 
-            max-width: 500px; /* Slightly wider for the sync UI */
+            max-width: 500px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
@@ -139,12 +139,13 @@
             
             <label>New Project Status</label>
             <select id="newStatus">
-                <option value="Application Under Review">1. Application Under Review</option>
-                <option value="Preferences Received & Planning">2. Preferences Received & Planning</option>
-                <option value="Design & UI Prototyping">3. Design & UI Prototyping</option>
-                <option value="Development & Coding">4. Development & Coding</option>
-                <option value="Final Testing & QA">5. Final Testing & QA</option>
-                <option value="Live & Deployed">6. Live & Deployed</option>
+                <option value="1. Application Under Review">1. Application Under Review</option>
+                <option value="2. Awaiting Preferences & Assets">2. Awaiting Preferences & Assets (Triggers Upload)</option>
+                <option value="3. Preferences Received & Planning">3. Preferences Received & Planning</option>
+                <option value="4. Design & UI Prototyping">4. Design & UI Prototyping</option>
+                <option value="5. Development & Coding">5. Development & Coding</option>
+                <option value="6. Final Testing & QA">6. Final Testing & QA</option>
+                <option value="7. Live & Deployed">7. Live & Deployed</option>
             </select>
             <button id="updateBtn">Update Ticket Status</button>
             <div id="message"></div>

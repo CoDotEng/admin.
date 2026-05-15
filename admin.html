@@ -22,9 +22,10 @@
             color: var(--text-main);
             display: flex; 
             justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
+            align-items: flex-start; /* Changed to flex-start for scrolling */
+            min-height: 100vh; 
             margin: 0;
+            padding: 40px 20px;
         }
 
         .admin-container {
@@ -33,7 +34,7 @@
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.05); 
             width: 100%; 
-            max-width: 450px;
+            max-width: 500px; /* Slightly wider for the sync UI */
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
@@ -43,6 +44,14 @@
             margin-bottom: 0.5rem; 
             text-align: center; 
             font-size: 2rem;
+        }
+
+        h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
         }
 
         p.subtitle {
@@ -58,8 +67,10 @@
             display: block; 
             margin-bottom: 0.5rem; 
             color: var(--text-muted); 
-            font-size: 0.9rem; 
+            font-size: 0.8rem; 
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         input, select {
@@ -72,6 +83,7 @@
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
+            margin-bottom: 10px;
         }
 
         input:focus, select:focus {
@@ -91,7 +103,7 @@
             font-family: 'Space Grotesk', sans-serif; 
             font-size: 1.1rem;
             transition: all 0.3s ease;
-            margin-top: 1rem;
+            margin-top: 5px;
         }
 
         button:hover { 
@@ -99,11 +111,17 @@
             transform: translateY(-2px);
         }
 
-        #message { 
+        .sync-btn {
+            background: #ffffff;
+            color: #000;
+            margin-top: 20px;
+        }
+
+        #message, #syncStatus { 
             margin-top: 1.5rem; 
             text-align: center; 
             font-weight: 600; 
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             min-height: 24px;
         }
     </style>
@@ -111,16 +129,15 @@
 <body>
 
     <div class="admin-container">
-        <h2>Ticket Manager</h2>
-        <p class="subtitle">Update client project status</p>
+        <h2>CODOT Admin Panel</h2>
+        <p class="subtitle">Control center for projects & performance</p>
         
+        <h3>Ticket Manager</h3>
         <div class="form-group">
-            <label for="adminTicketID">Client Ticket ID</label>
-            <input type="text" id="adminTicketID" placeholder="e.g. CO-A1B2C3" required>
-        </div>
-
-        <div class="form-group">
-            <label for="newStatus">New Project Status</label>
+            <label>Client Ticket ID</label>
+            <input type="text" id="adminTicketID" placeholder="e.g. CO-A1B2C3">
+            
+            <label>New Project Status</label>
             <select id="newStatus">
                 <option value="Application Under Review">1. Application Under Review</option>
                 <option value="Preferences Received & Planning">2. Preferences Received & Planning</option>
@@ -129,18 +146,26 @@
                 <option value="Final Testing & QA">5. Final Testing & QA</option>
                 <option value="Live & Deployed">6. Live & Deployed</option>
             </select>
+            <button id="updateBtn">Update Ticket Status</button>
+            <div id="message"></div>
         </div>
 
-        <button id="updateBtn">Update Status</button>
-        <div id="message"></div>
+        <h3>Portfolio Speed Sync</h3>
+        <div class="form-group">
+            <label>Add New Portfolio Project</label>
+            <input type="text" id="siteName" placeholder="Client Name (e.g. Gravity Res.)">
+            <input type="text" id="siteUrl" placeholder="URL (https://...)">
+            <button id="addProjectBtn" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">Add to Portfolio</button>
+        </div>
+
+        <button id="syncAllBtn" class="sync-btn">🔄 Sync All Live Scores</button>
+        <div id="syncStatus"></div>
     </div>
 
-    <!-- FIREBASE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs, updateDoc, doc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Your Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyD0PjmGveJ_QS4s3S0wFwiDjxdeE4tRKzw",
             authDomain: "codot-agency.firebaseapp.com",
@@ -150,57 +175,103 @@
             appId: "1:22678307444:web:59c72496bad5db86b3c721"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Update Logic
+        // --- LOGIC 1: TICKET UPDATER ---
         document.getElementById('updateBtn').addEventListener('click', async () => {
             const ticketInput = document.getElementById('adminTicketID').value.trim().toUpperCase();
             const newStatus = document.getElementById('newStatus').value;
             const messageDiv = document.getElementById('message');
-            const btn = document.getElementById('updateBtn');
+            
+            if(!ticketInput) return alert("Enter a Ticket ID");
 
-            if(!ticketInput) {
-                messageDiv.innerText = "Please enter a Ticket ID.";
-                messageDiv.style.color = "var(--error)";
-                return;
-            }
-
-            btn.innerText = "Updating...";
-            messageDiv.innerText = "Searching database...";
+            messageDiv.innerText = "Searching...";
             messageDiv.style.color = "var(--text-muted)";
 
             try {
-                // Find the document with this Ticket ID
                 const q = query(collection(db, "applications"), where("ticketID", "==", ticketInput));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    messageDiv.innerText = `Ticket ${ticketInput} not found!`;
+                    messageDiv.innerText = "Ticket not found!";
                     messageDiv.style.color = "var(--error)";
-                    btn.innerText = "Update Status";
                     return;
                 }
 
-                // Update the document (handles case if multiple docs have same ID, though unlikely)
                 querySnapshot.forEach(async (documentSnapshot) => {
-                    const docRef = doc(db, "applications", documentSnapshot.id);
-                    await updateDoc(docRef, {
-                        status: newStatus
-                    });
-                    messageDiv.innerText = `Success! Status updated to: ${newStatus}`;
+                    await updateDoc(doc(db, "applications", documentSnapshot.id), { status: newStatus });
+                    messageDiv.innerText = "✅ Status Updated Successfully!";
                     messageDiv.style.color = "var(--success)";
-                    btn.innerText = "Update Status";
-                    document.getElementById('adminTicketID').value = ''; // Clear input on success
                 });
-
-            } catch (error) {
-                console.error("Error updating ticket: ", error);
-                messageDiv.innerText = "Error updating ticket. Check console.";
-                messageDiv.style.color = "var(--error)";
-                btn.innerText = "Update Status";
+            } catch (e) {
+                messageDiv.innerText = "Error. Check console.";
+                console.error(e);
             }
+        });
+
+        // --- LOGIC 2: PORTFOLIO ADDER ---
+        document.getElementById('addProjectBtn').addEventListener('click', async () => {
+            const name = document.getElementById('siteName').value.trim();
+            const url = document.getElementById('siteUrl').value.trim();
+            
+            if(!name || !url) return alert("Fill both Name and URL");
+
+            try {
+                await addDoc(collection(db, "portfolio"), {
+                    name: name,
+                    url: url,
+                    score: "--",
+                    lastUpdated: new Date()
+                });
+                alert("Project Added to Portfolio!");
+                document.getElementById('siteName').value = "";
+                document.getElementById('siteUrl').value = "";
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        // --- LOGIC 3: LIVE SPEED SYNC (The "Magic" Part) ---
+        document.getElementById('syncAllBtn').addEventListener('click', async () => {
+            const statusDiv = document.getElementById('syncStatus');
+            const btn = document.getElementById('syncAllBtn');
+            
+            btn.disabled = true;
+            btn.innerText = "Syncing with Google...";
+            statusDiv.style.color = "var(--accent)";
+            statusDiv.innerText = "Testing performance live (approx 20s per site)...";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "portfolio"));
+                
+                for (const projectDoc of querySnapshot.docs) {
+                    const data = projectDoc.data();
+                    statusDiv.innerText = `Testing: ${data.name}...`;
+
+                    // Calling Public PageSpeed API (No Key Required)
+                    const apiURL = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(data.url)}&category=performance`;
+                    const response = await fetch(apiURL);
+                    const json = await response.json();
+                    
+                    const score = Math.round(json.lighthouseResult.categories.performance.score * 100);
+
+                    // Update Firebase with actual live score
+                    await updateDoc(doc(db, "portfolio", projectDoc.id), {
+                        score: score,
+                        lastUpdated: new Date()
+                    });
+                }
+
+                statusDiv.innerText = "✅ All Scores Synced to Homepage!";
+                statusDiv.style.color = "var(--success)";
+            } catch (e) {
+                statusDiv.innerText = "Error during sync. Check URL formats.";
+                statusDiv.style.color = "var(--error)";
+                console.error(e);
+            }
+            btn.disabled = false;
+            btn.innerText = "🔄 Sync All Live Scores";
         });
     </script>
 </body>

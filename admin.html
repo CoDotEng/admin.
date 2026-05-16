@@ -28,7 +28,6 @@
             padding: 40px 20px;
         }
 
-        /* Increased max-width from 500px to 700px to fit the new data grid nicely */
         .admin-container {
             background: var(--surface-color); 
             padding: 3rem; 
@@ -127,7 +126,50 @@
             min-height: 24px;
         }
 
-        /* --- NEW STYLES FOR CLIENT DATA VIEWER --- */
+        /* --- NEW: BIRD'S EYE DASHBOARD GRID --- */
+        #allProjectsGrid {
+            display: none; 
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .project-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .project-card:hover {
+            border-color: var(--accent);
+            background: rgba(0, 229, 255, 0.05);
+            transform: translateY(-3px);
+        }
+
+        .project-card h4 {
+            color: var(--accent);
+            margin: 0 0 8px 0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: var(--text-main);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        /* --- CLIENT DATA VIEWER STYLES --- */
         .flex-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .flex-row input { margin-bottom: 0; }
         .flex-row button { margin-top: 0; width: 150px; }
@@ -224,8 +266,18 @@
             <div id="message"></div>
         </div>
 
-        <!-- === SECTION 2: NEW CLIENT DATA VIEWER === -->
-        <h3>Client Data Viewer (Fetch Assets)</h3>
+        <!-- === SECTION 2: THE BIRD'S-EYE DASHBOARD === -->
+        <h3>Bird's-Eye Dashboard</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Click any project card to automatically pull its details.</p>
+        <div class="form-group">
+            <button id="loadAllBtn" class="btn-outline">Load All Active Projects</button>
+            <div id="allProjectsGrid">
+                <!-- Project cards will be injected here by JS -->
+            </div>
+        </div>
+
+        <!-- === SECTION 3: CLIENT DATA VIEWER === -->
+        <h3 id="dataViewerSection">Client Data Viewer (Fetch Assets)</h3>
         <div class="form-group">
             <label>Pull Preferences & Files</label>
             <div class="flex-row">
@@ -237,7 +289,7 @@
             <div id="clientDataDisplay"></div>
         </div>
 
-        <!-- === SECTION 3: PORTFOLIO ADDER (Kept as requested) === -->
+        <!-- === SECTION 4: PORTFOLIO ADDER === -->
         <h3>Portfolio Management</h3>
         <div class="form-group">
             <label>Add New Portfolio Project</label>
@@ -263,7 +315,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- LOGIC 1: TICKET UPDATER (Unchanged) ---
+        // --- LOGIC 1: TICKET UPDATER ---
         document.getElementById('updateBtn').addEventListener('click', async () => {
             const ticketInput = document.getElementById('adminTicketID').value.trim().toUpperCase();
             const newStatus = document.getElementById('newStatus').value;
@@ -288,6 +340,11 @@
                     await updateDoc(doc(db, "applications", documentSnapshot.id), { status: newStatus });
                     messageDiv.innerText = "✅ Status Updated Successfully!";
                     messageDiv.style.color = "var(--success)";
+                    
+                    // Auto-refresh the dashboard if it's open so it shows the new status
+                    if(document.getElementById('allProjectsGrid').style.display === "grid") {
+                        document.getElementById('loadAllBtn').click();
+                    }
                 });
             } catch (e) {
                 messageDiv.innerText = "Error. Check console.";
@@ -295,7 +352,64 @@
             }
         });
 
-        // --- LOGIC 2: CLIENT DATA VIEWER (Newly Added!) ---
+        // --- LOGIC 2: BIRD'S-EYE DASHBOARD ---
+        const loadAllBtn = document.getElementById('loadAllBtn');
+        const allProjectsGrid = document.getElementById('allProjectsGrid');
+
+        loadAllBtn.addEventListener('click', async () => {
+            loadAllBtn.innerText = "Fetching Database...";
+            loadAllBtn.disabled = true;
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "applications"));
+                
+                if (querySnapshot.empty) {
+                    allProjectsGrid.innerHTML = `<p style="color: var(--text-muted);">No active projects found.</p>`;
+                    allProjectsGrid.style.display = "block";
+                } else {
+                    allProjectsGrid.innerHTML = ""; // Clear out previous load
+                    allProjectsGrid.style.display = "grid";
+
+                    querySnapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        
+                        // Fallbacks just in case a field is empty
+                        const ticketID = data.ticketID || "UNKNOWN-ID";
+                        const statusRaw = data.status || "1. Application Under Review";
+                        const vibe = data.clientVibePref || "Awaiting Setup";
+                        
+                        // Clean up the status string to just show the text, not the number
+                        const cleanStatus = statusRaw.split('. ')[1] || statusRaw;
+
+                        // Create the Card Element
+                        const card = document.createElement('div');
+                        card.className = "project-card";
+                        card.innerHTML = `
+                            <h4>${ticketID}</h4>
+                            <div class="status-badge">${cleanStatus}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Vibe: <span style="color: var(--text-main);">${vibe}</span></div>
+                        `;
+
+                        // Add the "Click to view details" magic hack
+                        card.addEventListener('click', () => {
+                            document.getElementById('viewTicketInput').value = ticketID;
+                            document.getElementById('fetchDetailsBtn').click();
+                            document.getElementById('dataViewerSection').scrollIntoView({ behavior: 'smooth' });
+                        });
+
+                        allProjectsGrid.appendChild(card);
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching all projects: ", error);
+                alert("Failed to fetch dashboard. Check console.");
+            }
+
+            loadAllBtn.innerText = "Refresh All Projects";
+            loadAllBtn.disabled = false;
+        });
+
+        // --- LOGIC 3: CLIENT DATA VIEWER ---
         const fetchDetailsBtn = document.getElementById('fetchDetailsBtn');
         const viewTicketInput = document.getElementById('viewTicketInput');
         const clientDataDisplay = document.getElementById('clientDataDisplay');
@@ -319,7 +433,6 @@
                     querySnapshot.forEach((docSnap) => {
                         const data = docSnap.data();
                         
-                        // Extract variables with fallbacks
                         const primary = data.colors?.primary || "N/A";
                         const secondary = data.colors?.secondary || "N/A";
                         const bg = data.colors?.background || "N/A";
@@ -327,7 +440,6 @@
                         const notes = data.clientCustomNotes || "No extra notes provided.";
                         const assetUrl = data.assetDownloadUrl || null;
 
-                        // Inject HTML into the display box
                         clientDataDisplay.style.display = "block";
                         clientDataDisplay.innerHTML = `
                             <div style="margin-bottom: 15px;">
@@ -378,7 +490,7 @@
             fetchDetailsBtn.disabled = false;
         });
 
-        // --- LOGIC 3: PORTFOLIO ADDER (Unchanged) ---
+        // --- LOGIC 4: PORTFOLIO ADDER ---
         document.getElementById('addProjectBtn').addEventListener('click', async () => {
             const name = document.getElementById('siteName').value.trim();
             const url = document.getElementById('siteUrl').value.trim();

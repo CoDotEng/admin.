@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODOT | Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <title>CODOT | Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #050505;
@@ -12,161 +12,147 @@
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
             --accent: #00e5ff;
-            --success: #10b981;
-            --error: #ef4444;
+            --card-border: rgba(255,255,255,0.08);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-main);
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start;
-            min-height: 100vh; 
-            margin: 0;
-            padding: 40px 20px;
-        }
-
-        .admin-container {
-            background: var(--surface-color); 
-            padding: 3rem; 
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05); 
-            width: 100%; 
-            max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        h2 { 
-            font-family: 'Space Grotesk', sans-serif; 
-            color: var(--accent); 
-            margin-bottom: 0.5rem; 
-            text-align: center; 
-            font-size: 2rem;
-        }
-
-        h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            margin-top: 2rem;
-            font-size: 1.2rem;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-        }
-
-        p.subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-
-        .form-group { margin-bottom: 1.5rem; }
-        
-        label { 
-            display: block; 
-            margin-bottom: 0.5rem; 
-            color: var(--text-muted); 
-            font-size: 0.8rem; 
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        input, select {
-            width: 100%; 
-            padding: 1rem; 
-            background: var(--bg-color); 
-            color: var(--text-main);
-            border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 6px; 
-            box-sizing: border-box;
             font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            margin-bottom: 10px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4rem 5%;
         }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--accent);
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+
+        .header { text-align: center; margin-bottom: 3rem; }
+        .header h1 { font-size: 2.5rem; color: var(--accent); }
+        .header p { color: var(--text-muted); }
+
+        .search-box {
+            display: flex; gap: 1rem; margin-bottom: 3rem;
+            width: 100%; max-width: 600px;
         }
+
+        input[type="text"] {
+            flex-grow: 1; padding: 1rem 1.5rem;
+            background: var(--surface-color); border: 1px solid var(--card-border);
+            border-radius: 8px; color: var(--text-main); font-size: 1.1rem;
+            outline: none; transition: 0.3s;
+        }
+        input[type="text"]:focus { border-color: var(--accent); }
 
         button {
-            width: 100%; 
-            padding: 1rem; 
-            background: var(--accent); 
-            color: var(--bg-color);
-            border: none; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            cursor: pointer;
-            font-family: 'Space Grotesk', sans-serif; 
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            margin-top: 5px;
+            padding: 1rem 2rem; background-color: var(--accent); color: var(--bg-color);
+            border: none; border-radius: 8px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; transition: 0.3s;
+        }
+        button:hover { box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Results Area */
+        #results-container {
+            display: none; width: 100%; max-width: 800px;
+            background: var(--surface-color); border: 1px solid var(--card-border);
+            border-radius: 12px; padding: 2rem;
+            animation: fadeIn 0.4s ease-out;
         }
 
-        button:hover { 
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); 
-            transform: translateY(-2px);
+        .status-badge {
+            display: inline-block; padding: 0.4rem 1rem; border-radius: 50px;
+            font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem;
+            background: rgba(0, 229, 255, 0.1); color: var(--accent); border: 1px solid var(--accent);
         }
 
-        .sync-btn {
-            background: #ffffff;
-            color: #000;
-            margin-top: 20px;
+        .data-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
         }
 
-        #message, #syncStatus { 
-            margin-top: 1.5rem; 
-            text-align: center; 
-            font-weight: 600; 
-            font-size: 0.9rem;
-            min-height: 24px;
+        .data-block { margin-bottom: 1.5rem; }
+        .data-block h3 { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px;}
+        .data-block p { font-size: 1.1rem; font-weight: 500; }
+
+        /* Color Swatches */
+        .color-palette { display: flex; gap: 1rem; }
+        .swatch-container { display: flex; flex-direction: column; align-items: center; gap: 0.5rem;}
+        .swatch {
+            width: 50px; height: 50px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
         }
+        .hex-code { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; }
+
+        .download-btn {
+            display: inline-block; padding: 0.8rem 1.5rem; background: transparent;
+            color: var(--text-main); border: 1px solid var(--card-border);
+            border-radius: 8px; text-decoration: none; margin-top: 1rem; transition: 0.3s;
+        }
+        .download-btn:hover { border-color: var(--text-main); background: rgba(255,255,255,0.05); }
+
+        .error-msg { color: #ff4757; margin-top: 1rem; display: none; font-weight: 600; text-align: center;}
+
+        @media (max-width: 600px) {
+            .data-grid { grid-template-columns: 1fr; }
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div class="admin-container">
-        <h2>CODOT Admin Panel</h2>
-        <p class="subtitle">Control center for projects & performance</p>
+    <div class="header">
+        <h1>Admin Control Panel</h1>
+        <p>Pull client preferences, assets, and project status securely.</p>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="adminTicketInput" placeholder="Enter Client Ticket ID (e.g., CO-12345)">
+        <button id="searchBtn">Fetch Details</button>
+    </div>
+
+    <div class="error-msg" id="errorMsg">Ticket not found or no data available.</div>
+
+    <div id="results-container">
+        <div class="status-badge" id="clientStatus">Status: Unknown</div>
         
-        <h3>Ticket Manager</h3>
-        <div class="form-group">
-            <label>Client Ticket ID</label>
-            <input type="text" id="adminTicketID" placeholder="e.g. CO-A1B2C3">
-            
-            <label>New Project Status</label>
-            <select id="newStatus">
-                <option value="1. Application Under Review">1. Application Under Review</option>
-                <option value="2. Awaiting Preferences & Assets">2. Awaiting Preferences & Assets</option>
-                <option value="3. Preferences Received & Planning">3. Preferences Received & Planning</option>
-                <option value="4. Design & UI Prototyping">4. Design & UI Prototyping</option>
-                <option value="5. Development & Coding">5. Development & Coding</option>
-                <option value="6. Final Testing & QA">6. Final Testing & QA</option>
-                <option value="7. Live & Deployed">7. Live & Deployed</option>
-            </select>
-            <button id="updateBtn">Update Ticket Status</button>
-            <div id="message"></div>
-        </div>
+        <div class="data-grid">
+            <div>
+                <div class="data-block">
+                    <h3>Design Vibe Selected</h3>
+                    <p id="clientVibe">Clean & Minimal</p>
+                </div>
 
-        <h3>Portfolio Speed Sync</h3>
-        <div class="form-group">
-            <label>Add New Portfolio Project</label>
-            <input type="text" id="siteName" placeholder="Client Name (e.g. Gravity Res.)">
-            <input type="text" id="siteUrl" placeholder="URL (https://...)">
-            <button id="addProjectBtn" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">Add to Portfolio</button>
-        </div>
+                <div class="data-block">
+                    <h3>Brand Color Palette</h3>
+                    <div class="color-palette" id="colorPalette">
+                        </div>
+                </div>
+            </div>
 
-        <button id="syncAllBtn" class="sync-btn">🔄 Sync All Live Scores</button>
-        <div id="syncStatus"></div>
+            <div>
+                <div class="data-block">
+                    <h3>Client Custom Notes</h3>
+                    <p id="clientNotes" style="font-size: 0.95rem; color: var(--text-muted); background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px;">
+                        No notes provided.
+                    </p>
+                </div>
+
+                <div class="data-block">
+                    <h3>Uploaded Brand Assets</h3>
+                    <div id="assetContainer">
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">No assets uploaded yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, updateDoc, doc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // Same config as your front-end
         const firebaseConfig = {
             apiKey: "AIzaSyD0PjmGveJ_QS4s3S0wFwiDjxdeE4tRKzw",
             authDomain: "codot-agency.firebaseapp.com",
@@ -179,100 +165,89 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- LOGIC 1: TICKET UPDATER ---
-        document.getElementById('updateBtn').addEventListener('click', async () => {
-            const ticketInput = document.getElementById('adminTicketID').value.trim().toUpperCase();
-            const newStatus = document.getElementById('newStatus').value;
-            const messageDiv = document.getElementById('message');
-            
-            if(!ticketInput) return alert("Enter a Ticket ID");
+        const searchBtn = document.getElementById('searchBtn');
+        const input = document.getElementById('adminTicketInput');
+        const resultsContainer = document.getElementById('results-container');
+        const errorMsg = document.getElementById('errorMsg');
 
-            messageDiv.innerText = "Searching...";
-            messageDiv.style.color = "var(--text-muted)";
+        // DOM Elements for Data
+        const clientStatus = document.getElementById('clientStatus');
+        const clientVibe = document.getElementById('clientVibe');
+        const colorPalette = document.getElementById('colorPalette');
+        const clientNotes = document.getElementById('clientNotes');
+        const assetContainer = document.getElementById('assetContainer');
+
+        searchBtn.addEventListener('click', async () => {
+            const ticketId = input.value.trim().toUpperCase();
+            if(!ticketId) return;
+
+            searchBtn.innerText = "Loading...";
+            searchBtn.disabled = true;
+            resultsContainer.style.display = "none";
+            errorMsg.style.display = "none";
 
             try {
-                const q = query(collection(db, "applications"), where("ticketID", "==", ticketInput));
+                const q = query(collection(db, "applications"), where("ticketID", "==", ticketId));
                 const querySnapshot = await getDocs(q);
 
-                if (querySnapshot.empty) {
-                    messageDiv.innerText = "Ticket not found!";
-                    messageDiv.style.color = "var(--error)";
-                    return;
-                }
-
-                querySnapshot.forEach(async (documentSnapshot) => {
-                    await updateDoc(doc(db, "applications", documentSnapshot.id), { status: newStatus });
-                    messageDiv.innerText = "✅ Status Updated Successfully!";
-                    messageDiv.style.color = "var(--success)";
-                });
-            } catch (e) {
-                messageDiv.innerText = "Error. Check console.";
-                console.error(e);
-            }
-        });
-
-        // --- LOGIC 2: PORTFOLIO ADDER ---
-        document.getElementById('addProjectBtn').addEventListener('click', async () => {
-            const name = document.getElementById('siteName').value.trim();
-            const url = document.getElementById('siteUrl').value.trim();
-            
-            if(!name || !url) return alert("Fill both Name and URL");
-
-            try {
-                await addDoc(collection(db, "portfolio"), {
-                    name: name,
-                    url: url,
-                    score: "--",
-                    lastUpdated: new Date()
-                });
-                alert("Project Added to Portfolio!");
-                document.getElementById('siteName').value = "";
-                document.getElementById('siteUrl').value = "";
-            } catch (e) {
-                console.error(e);
-            }
-        });
-
-        // --- LOGIC 3: LIVE SPEED SYNC (The "Magic" Part) ---
-        document.getElementById('syncAllBtn').addEventListener('click', async () => {
-            const statusDiv = document.getElementById('syncStatus');
-            const btn = document.getElementById('syncAllBtn');
-            
-            btn.disabled = true;
-            btn.innerText = "Syncing with Google...";
-            statusDiv.style.color = "var(--accent)";
-            statusDiv.innerText = "Testing performance live (approx 20s per site)...";
-
-            try {
-                const querySnapshot = await getDocs(collection(db, "portfolio"));
-                
-                for (const projectDoc of querySnapshot.docs) {
-                    const data = projectDoc.data();
-                    statusDiv.innerText = `Testing: ${data.name}...`;
-
-                    // Calling Public PageSpeed API (No Key Required)
-                    const apiURL = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(data.url)}&category=performance`;
-                    const response = await fetch(apiURL);
-                    const json = await response.json();
+                if (!querySnapshot.empty) {
+                    const data = querySnapshot.docs[0].data();
                     
-                    const score = Math.round(json.lighthouseResult.categories.performance.score * 100);
+                    // Render Status
+                    clientStatus.innerText = `Status: ${data.status || 'Pending'}`;
+                    
+                    // Render Vibe
+                    clientVibe.innerText = data.clientVibePref || 'Not selected yet';
+                    
+                    // Render Notes
+                    clientNotes.innerText = data.clientCustomNotes || 'No extra notes provided by client.';
 
-                    // Update Firebase with actual live score
-                    await updateDoc(doc(db, "portfolio", projectDoc.id), {
-                        score: score,
-                        lastUpdated: new Date()
-                    });
+                    // Render Colors with Swatches
+                    colorPalette.innerHTML = '';
+                    if (data.colors) {
+                        const colors = [
+                            { name: 'Primary', hex: data.colors.primary },
+                            { name: 'Secondary', hex: data.colors.secondary },
+                            { name: 'Background', hex: data.colors.background }
+                        ];
+                        
+                        colors.forEach(c => {
+                            if(c.hex) {
+                                colorPalette.innerHTML += `
+                                    <div class="swatch-container">
+                                        <div class="swatch" style="background-color: ${c.hex}"></div>
+                                        <span class="hex-code">${c.hex}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                    } else {
+                        colorPalette.innerHTML = '<p style="font-size: 0.9rem; color: #9ca3af;">Colors not set yet.</p>';
+                    }
+
+                    // Render Asset Link
+                    if (data.assetDownloadUrl) {
+                        assetContainer.innerHTML = `
+                            <a href="${data.assetDownloadUrl}" target="_blank" class="download-btn">
+                                ⬇️ Download Assets File
+                            </a>
+                        `;
+                    } else {
+                        assetContainer.innerHTML = '<p style="font-size: 0.9rem; color: #9ca3af;">No assets uploaded yet.</p>';
+                    }
+
+                    resultsContainer.style.display = "block";
+                } else {
+                    errorMsg.style.display = "block";
                 }
-
-                statusDiv.innerText = "✅ All Scores Synced to Homepage!";
-                statusDiv.style.color = "var(--success)";
-            } catch (e) {
-                statusDiv.innerText = "Error during sync. Check URL formats.";
-                statusDiv.style.color = "var(--error)";
-                console.error(e);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                errorMsg.innerText = "Error connecting to database. Check permissions.";
+                errorMsg.style.display = "block";
             }
-            btn.disabled = false;
-            btn.innerText = "🔄 Sync All Live Scores";
+
+            searchBtn.innerText = "Fetch Details";
+            searchBtn.disabled = false;
         });
     </script>
 </body>

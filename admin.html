@@ -3,254 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODOT | Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <title>CODOT | Master Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #050505;
             --surface-color: #121212;
+            --surface-light: #1a1a1a;
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
             --accent: #00e5ff;
             --success: #10b981;
+            --warning: #f59e0b;
             --error: #ef4444;
+            --border: rgba(255,255,255,0.08);
         }
 
         body {
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-main);
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start;
-            min-height: 100vh; 
-            margin: 0;
-            padding: 40px 20px;
+            font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main);
+            margin: 0; padding: 40px 20px; display: flex; justify-content: center; min-height: 100vh;
         }
 
-        .admin-container {
-            background: var(--surface-color); 
-            padding: 3rem; 
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05); 
-            width: 100%; 
-            max-width: 800px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .admin-wrapper {
+            width: 100%; max-width: 1000px; /* Made wider for better data display */
         }
 
-        h2 { 
-            font-family: 'Space Grotesk', sans-serif; 
-            color: var(--accent); 
-            margin-bottom: 0.5rem; 
-            text-align: center; 
-            font-size: 2rem;
-        }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .header h1 { font-family: 'Space Grotesk', sans-serif; color: var(--accent); font-size: 2.5rem; margin: 0 0 0.5rem 0; }
+        .header p { color: var(--text-muted); margin: 0; }
 
-        h3 {
+        /* --- DASHBOARD CARDS --- */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .dashboard-header h2 { font-family: 'Space Grotesk', sans-serif; margin: 0; font-size: 1.5rem; }
+        
+        .btn-action {
+            background: rgba(0, 229, 255, 0.1); color: var(--accent); border: 1px solid var(--accent);
+            padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;
             font-family: 'Space Grotesk', sans-serif;
-            margin-top: 2.5rem;
-            font-size: 1.2rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
-            color: var(--text-main);
+        }
+        .btn-action:hover { background: var(--accent); color: var(--bg-color); box-shadow: 0 0 15px rgba(0,229,255,0.3); }
+
+        #projectsGrid {
+            display: none; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 3rem;
+            animation: fadeIn 0.4s ease;
         }
 
-        p.subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
+        .client-card {
+            background: var(--surface-color); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem;
+            cursor: pointer; transition: all 0.2s; position: relative;
+        }
+        .client-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .client-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; margin: 0; color: var(--text-main); }
+        .ticket-id { font-size: 0.75rem; color: var(--accent); background: rgba(0,229,255,0.1); padding: 2px 8px; border-radius: 12px; }
+        .client-email { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; display: block; }
+        
+        .status-pill { display: inline-block; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.1); font-weight: 600; }
+
+        /* --- EDITOR SECTION --- */
+        #editorWrapper { display: none; animation: fadeIn 0.4s ease; }
+        
+        .editor-layout {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;
         }
 
-        .form-group { margin-bottom: 1.5rem; }
-        
-        label { 
-            display: block; 
-            margin-bottom: 0.5rem; 
-            color: var(--text-muted); 
-            font-size: 0.8rem; 
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .editor-panel {
+            background: var(--surface-color); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem;
         }
-        
+        .editor-panel h3 { font-family: 'Space Grotesk', sans-serif; color: var(--accent); margin: 0 0 1.5rem 0; font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600; }
         input, select, textarea {
-            width: 100%; 
-            padding: 1rem; 
-            background: var(--bg-color); 
-            color: var(--text-main);
-            border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 6px; 
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            margin-bottom: 15px;
-            transition: border-color 0.3s;
+            width: 100%; padding: 0.8rem; background: var(--bg-color); color: var(--text-main);
+            border: 1px solid var(--border); border-radius: 4px; font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s; box-sizing: border-box;
         }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+        textarea { resize: vertical; min-height: 80px; }
 
-        textarea { resize: vertical; min-height: 100px; }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        button {
-            width: 100%; 
-            padding: 1rem; 
-            background: var(--accent); 
-            color: var(--bg-color);
-            border: none; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            cursor: pointer;
-            font-family: 'Space Grotesk', sans-serif; 
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            margin-top: 5px;
-        }
-
-        button:hover { 
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); 
-            transform: translateY(-2px);
-        }
-
-        .btn-outline {
-            background: transparent; 
-            border: 1px solid var(--accent); 
-            color: var(--accent);
-        }
+        .flex-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
         
         .btn-save {
-            background: var(--success);
-            color: #fff;
-            margin-top: 15px;
+            width: 100%; padding: 1.2rem; background: var(--success); color: #fff; font-size: 1.1rem;
+            font-family: 'Space Grotesk', sans-serif; font-weight: bold; border: none; border-radius: 8px;
+            cursor: pointer; transition: all 0.3s;
         }
+        .btn-save:hover { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); transform: translateY(-2px); }
 
-        .btn-save:hover {
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); 
+        .email-link {
+            display: inline-block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 600;
         }
+        .email-link:hover { text-decoration: underline; }
 
-        #message { 
-            margin-top: 1rem; 
-            text-align: center; 
-            font-weight: 600; 
-            font-size: 0.9rem;
-            min-height: 24px;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- DASHBOARD GRID --- */
-        #allProjectsGrid {
-            display: none; 
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .project-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .project-card:hover {
-            border-color: var(--accent);
-            background: rgba(0, 229, 255, 0.05);
-            transform: translateY(-3px);
-        }
-
-        .project-card h4 {
-            color: var(--accent);
-            margin: 0 0 8px 0;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.1rem;
-        }
-
-        .status-badge {
-            display: inline-block;
-            font-size: 0.7rem;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.1);
-            color: var(--text-main);
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        /* --- MASTER EDITOR --- */
-        .flex-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .flex-row input { margin-bottom: 0; }
-        .flex-row button { margin-top: 0; width: 150px; }
-
-        #editorSection {
-            display: none; 
-            background: rgba(255,255,255,0.02); 
-            border: 1px solid rgba(255,255,255,0.05); 
-            border-radius: 8px; 
-            padding: 20px;
-            margin-top: 15px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .asset-link {
-            display: inline-block;
-            margin-top: 10px;
-            color: var(--accent);
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        @media (max-width: 600px) {
-            .grid-2 { grid-template-columns: 1fr; }
-            .flex-row { flex-direction: column; }
-            .flex-row button { width: 100%; }
-        }
+        @media (max-width: 768px) { .editor-layout { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <div class="admin-container">
-        <h2>CODOT Admin Panel</h2>
-        <p class="subtitle">Control center for projects & performance</p>
-        
-        <h3>Active Projects Dashboard</h3>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Click any project card to pull it into the editor.</p>
-        <div class="form-group">
-            <button id="loadAllBtn" class="btn-outline">Load All Active Projects</button>
-            <div id="allProjectsGrid">
-                </div>
+    <div class="admin-wrapper">
+        <div class="header">
+            <h1>CODOT Command Center</h1>
+            <p>Manage clients, update statuses, and access project data efficiently.</p>
         </div>
 
-        <h3 id="dataViewerSection">Master Project Editor</h3>
-        <div class="form-group">
-            <label>Fetch Client Ticket</label>
-            <div class="flex-row">
-                <input type="text" id="viewTicketInput" placeholder="Enter Ticket ID (e.g. CO-XXXXXX)">
-                <button id="fetchDetailsBtn" class="btn-outline">Pull Details</button>
+        <div class="dashboard-header">
+            <h2>Active Client Roster</h2>
+            <button id="loadBtn" class="btn-action">Sync Database</button>
+        </div>
+        
+        <div id="projectsGrid">
             </div>
-            <div id="fetchMessage" style="text-align: center; font-size: 0.9rem; margin-top: 10px;"></div>
 
-            <div id="editorSection">
-                <div class="grid-2">
-                    <div>
-                        <label>Ticket ID (Read-Only)</label>
-                        <input type="text" id="editTicketID" readonly style="color: var(--accent); border-color: var(--accent); background: rgba(0,229,255,0.05);">
+        <div id="editorWrapper">
+            <div class="dashboard-header" style="margin-top: 2rem;">
+                <h2 id="editorTitle">Editing Client: <span style="color: var(--accent)">Select a project</span></h2>
+                <span id="editorTicket" class="ticket-id" style="font-size: 1rem;">--</span>
+            </div>
+
+            <div class="editor-layout">
+                
+                <div class="editor-panel">
+                    <h3>Client Identity & Status</h3>
+                    
+                    <div class="form-group">
+                        <label>Client Name</label>
+                        <input type="text" id="eName" placeholder="Client Name">
                     </div>
-                    <div>
-                        <label>Project Status</label>
-                        <select id="editStatus">
+                    
+                    <div class="form-group">
+                        <label>Client Email</label>
+                        <input type="email" id="eEmail" placeholder="client@email.com">
+                        <a href="#" id="eEmailLink" class="email-link">📧 Send Email</a>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <label>Current Phase (Status)</label>
+                        <select id="eStatus">
                             <option value="1. Application Under Review">1. Application Under Review</option>
                             <option value="2. Awaiting Preferences & Assets">2. Awaiting Preferences & Assets</option>
                             <option value="3. Preferences Received & Planning">3. Preferences Received & Planning</option>
@@ -260,55 +152,57 @@
                             <option value="7. Live & Deployed">7. Live & Deployed</option>
                         </select>
                     </div>
-                    <div>
-                        <label>Project Name (For Dashboard)</label>
-                        <input type="text" id="editProjectName" placeholder="e.g. Custom Landing Page">
+
+                    <div class="form-group">
+                        <label>Project Display Name</label>
+                        <input type="text" id="eProjectName" placeholder="e.g. Gravity Research Landing">
                     </div>
-                    <div>
-                        <label>Est. Delivery Date</label>
-                        <input type="text" id="editEstDelivery" placeholder="e.g. Nov 14, 2026">
-                    </div>
-                    <div>
-                        <label>Client Vibe Preference</label>
-                        <input type="text" id="editVibe" placeholder="e.g. Dark, Neon, Minimalist">
-                    </div>
-                    <div>
-                        <label>Primary Color (Hex)</label>
-                        <input type="text" id="editPrimary" placeholder="#00e5ff">
-                    </div>
-                    <div>
-                        <label>Secondary Color (Hex)</label>
-                        <input type="text" id="editSecondary" placeholder="#ffffff">
-                    </div>
-                    <div>
-                        <label>Background Color (Hex)</label>
-                        <input type="text" id="editBackground" placeholder="#050505">
+
+                    <div class="form-group">
+                        <label>Estimated Delivery Date</label>
+                        <input type="text" id="eDate" placeholder="e.g. Nov 14, 2026">
                     </div>
                 </div>
 
-                <label style="margin-top: 15px;">Asset Download URL</label>
-                <input type="text" id="editAssetUrl" placeholder="https://drive.google.com/...">
-                <a id="currentAssetLink" class="asset-link" href="#" target="_blank" style="display: none;">📁 Open Current Assets</a>
+                <div class="editor-panel">
+                    <h3>Brand & Design Assets</h3>
+                    
+                    <div class="form-group">
+                        <label>Design Vibe Preference</label>
+                        <input type="text" id="eVibe" placeholder="e.g. Minimalist, Dark Mode">
+                    </div>
 
-                <label style="margin-top: 15px;">Client Notes / Extras</label>
-                <textarea id="editNotes" placeholder="Client notes go here..."></textarea>
+                    <div class="form-group">
+                        <label>Brand Colors (Hex)</label>
+                        <div class="flex-inputs">
+                            <input type="text" id="eColorPri" placeholder="Primary">
+                            <input type="text" id="eColorSec" placeholder="Secondary">
+                            <input type="text" id="eColorBg" placeholder="Background">
+                        </div>
+                    </div>
 
-                <button id="saveChangesBtn" class="btn-save">Save All Changes to Database</button>
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <label>Drive / Asset URL</label>
+                        <input type="text" id="eAssetUrl" placeholder="https://drive.google.com/...">
+                        <a href="#" id="eAssetLink" class="email-link" target="_blank" style="display:none; color: var(--warning);">📁 Open Client Assets</a>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Internal Admin Notes</label>
+                        <textarea id="eNotes" placeholder="Any special requests or details..."></textarea>
+                    </div>
+                </div>
+
             </div>
+
+            <button id="saveBtn" class="btn-save">💾 Save All Client Changes</button>
         </div>
 
-        <h3>Portfolio Management</h3>
-        <div class="form-group">
-            <label>Add New Portfolio Project</label>
-            <input type="text" id="siteName" placeholder="Client Name (e.g. Gravity Res.)">
-            <input type="text" id="siteUrl" placeholder="URL (https://...)">
-            <button id="addProjectBtn" class="btn-outline">Add to Portfolio</button>
-        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, updateDoc, doc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD0PjmGveJ_QS4s3S0wFwiDjxdeE4tRKzw",
@@ -322,196 +216,140 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Global variable to track which document we are currently editing
-        let currentEditingDocId = null; 
+        let currentDocId = null;
 
-        // --- LOGIC 1: BIRD'S-EYE DASHBOARD ---
-        const loadAllBtn = document.getElementById('loadAllBtn');
-        const allProjectsGrid = document.getElementById('allProjectsGrid');
+        const loadBtn = document.getElementById('loadBtn');
+        const grid = document.getElementById('projectsGrid');
+        const editor = document.getElementById('editorWrapper');
 
-        loadAllBtn.addEventListener('click', async () => {
-            loadAllBtn.innerText = "Fetching Database...";
-            loadAllBtn.disabled = true;
+        // --- LOAD ROSTER ---
+        loadBtn.addEventListener('click', async () => {
+            loadBtn.innerText = "Syncing...";
+            grid.style.display = "none";
+            grid.innerHTML = "";
 
             try {
-                const querySnapshot = await getDocs(collection(db, "applications"));
+                const snapshot = await getDocs(collection(db, "applications"));
                 
-                if (querySnapshot.empty) {
-                    allProjectsGrid.innerHTML = `<p style="color: var(--text-muted);">No active projects found.</p>`;
-                    allProjectsGrid.style.display = "block";
+                if (snapshot.empty) {
+                    grid.innerHTML = `<p style="color: var(--text-muted);">No clients found in database.</p>`;
                 } else {
-                    allProjectsGrid.innerHTML = ""; 
-                    allProjectsGrid.style.display = "grid";
-
-                    querySnapshot.forEach((docSnap) => {
+                    snapshot.forEach(docSnap => {
                         const data = docSnap.data();
+                        const id = docSnap.id;
                         
-                        const ticketID = data.ticketID || "UNKNOWN-ID";
+                        // Extract Data safely
+                        const name = data.clientName || "Unnamed Client";
+                        const email = data.clientEmail || "No Email Provided";
+                        const ticket = data.ticketID || "NO-TICKET";
                         const statusRaw = data.status || "1. Application Under Review";
-                        const projectName = data.projectName || "Pending Setup";
                         const cleanStatus = statusRaw.split('. ')[1] || statusRaw;
+                        const projName = data.projectName || "Pending Setup";
 
+                        // Create Card
                         const card = document.createElement('div');
-                        card.className = "project-card";
+                        card.className = "client-card";
                         card.innerHTML = `
-                            <h4>${ticketID}</h4>
-                            <div class="status-badge">${cleanStatus}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Project: <span style="color: var(--text-main);">${projectName}</span></div>
+                            <div class="card-top">
+                                <h3 class="client-name">${name}</h3>
+                                <span class="ticket-id">${ticket}</span>
+                            </div>
+                            <span class="client-email">${email}</span>
+                            <div style="margin-bottom: 10px; font-size: 0.85rem; color: var(--text-muted);">Project: <span style="color: var(--text-main);">${projName}</span></div>
+                            <div class="status-pill">${cleanStatus}</div>
                         `;
 
-                        // Magic Hack: Click card to load into editor
-                        card.addEventListener('click', () => {
-                            document.getElementById('viewTicketInput').value = ticketID;
-                            document.getElementById('fetchDetailsBtn').click();
-                            document.getElementById('dataViewerSection').scrollIntoView({ behavior: 'smooth' });
-                        });
-
-                        allProjectsGrid.appendChild(card);
-                    });
-                }
-            } catch (error) {
-                console.error("Error fetching all projects: ", error);
-                alert("Failed to fetch dashboard. Check console.");
-            }
-
-            loadAllBtn.innerText = "Refresh All Projects";
-            loadAllBtn.disabled = false;
-        });
-
-        // --- LOGIC 2: MASTER FETCH & POPULATE EDITOR ---
-        const fetchDetailsBtn = document.getElementById('fetchDetailsBtn');
-        const viewTicketInput = document.getElementById('viewTicketInput');
-        const editorSection = document.getElementById('editorSection');
-        const fetchMessage = document.getElementById('fetchMessage');
-
-        fetchDetailsBtn.addEventListener('click', async () => {
-            const ticketId = viewTicketInput.value.trim().toUpperCase();
-            
-            if (!ticketId) {
-                alert("Please enter a Ticket ID to pull details.");
-                return;
-            }
-
-            fetchMessage.innerText = "Pulling data...";
-            fetchMessage.style.color = "var(--text-muted)";
-            editorSection.style.display = "none";
-            currentEditingDocId = null;
-
-            try {
-                const q = query(collection(db, "applications"), where("ticketID", "==", ticketId));
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    querySnapshot.forEach((docSnap) => {
-                        const data = docSnap.data();
-                        currentEditingDocId = docSnap.id; // Save the unique Firestore ID for updating later
+                        // Load data into editor on click
+                        card.addEventListener('click', () => loadEditor(id, data));
                         
-                        // Populate form fields
-                        document.getElementById('editTicketID').value = data.ticketID || "";
-                        document.getElementById('editStatus').value = data.status || "1. Application Under Review";
-                        document.getElementById('editProjectName').value = data.projectName || "";
-                        document.getElementById('editEstDelivery').value = data.estDelivery || "";
-                        document.getElementById('editVibe').value = data.clientVibePref || "";
-                        document.getElementById('editPrimary').value = data.colors?.primary || "";
-                        document.getElementById('editSecondary').value = data.colors?.secondary || "";
-                        document.getElementById('editBackground').value = data.colors?.background || "";
-                        document.getElementById('editNotes').value = data.clientCustomNotes || "";
-                        document.getElementById('editAssetUrl').value = data.assetDownloadUrl || "";
-
-                        // Handle Asset Link visibility
-                        const assetLink = document.getElementById('currentAssetLink');
-                        if(data.assetDownloadUrl) {
-                            assetLink.href = data.assetDownloadUrl;
-                            assetLink.style.display = "inline-block";
-                        } else {
-                            assetLink.style.display = "none";
-                        }
-
-                        editorSection.style.display = "block";
-                        fetchMessage.innerText = "✅ Client data loaded successfully.";
-                        fetchMessage.style.color = "var(--success)";
+                        grid.appendChild(card);
                     });
-                } else {
-                    fetchMessage.innerText = `❌ No application found with Ticket ID: ${ticketId}`;
-                    fetchMessage.style.color = "var(--error)";
                 }
+                grid.style.display = "grid";
             } catch (error) {
-                console.error("Error fetching data:", error);
-                fetchMessage.innerText = "Error fetching data. Check your connection.";
-                fetchMessage.style.color = "var(--error)";
+                console.error("Fetch Error:", error);
+                alert("Failed to sync database.");
             }
+            loadBtn.innerText = "Sync Database";
         });
 
-        // --- LOGIC 3: SAVE CHANGES TO FIRESTORE ---
-        document.getElementById('saveChangesBtn').addEventListener('click', async () => {
-            if (!currentEditingDocId) return alert("No active document loaded!");
+        // --- POPULATE EDITOR ---
+        function loadEditor(docId, data) {
+            currentDocId = docId;
+            
+            // Header Info
+            document.getElementById('editorTitle').innerHTML = `Editing: <span style="color: var(--accent)">${data.clientName || 'Unnamed Client'}</span>`;
+            document.getElementById('editorTicket').innerText = data.ticketID || "NO-TICKET";
 
-            const saveBtn = document.getElementById('saveChangesBtn');
-            saveBtn.innerText = "Saving...";
-            saveBtn.disabled = true;
+            // Populate Form
+            document.getElementById('eName').value = data.clientName || "";
+            document.getElementById('eEmail').value = data.clientEmail || "";
+            document.getElementById('eStatus').value = data.status || "1. Application Under Review";
+            document.getElementById('eProjectName').value = data.projectName || "";
+            document.getElementById('eDate').value = data.estDelivery || "";
+            document.getElementById('eVibe').value = data.clientVibePref || "";
+            document.getElementById('eColorPri').value = data.colors?.primary || "";
+            document.getElementById('eColorSec').value = data.colors?.secondary || "";
+            document.getElementById('eColorBg').value = data.colors?.background || "";
+            document.getElementById('eAssetUrl').value = data.assetDownloadUrl || "";
+            document.getElementById('eNotes').value = data.clientCustomNotes || "";
+
+            // Dynamic Links
+            const emailLink = document.getElementById('eEmailLink');
+            if(data.clientEmail) {
+                emailLink.href = `mailto:${data.clientEmail}`;
+                emailLink.style.display = "inline-block";
+            } else { emailLink.style.display = "none"; }
+
+            const assetLink = document.getElementById('eAssetLink');
+            if(data.assetDownloadUrl) {
+                assetLink.href = data.assetDownloadUrl;
+                assetLink.style.display = "inline-block";
+            } else { assetLink.style.display = "none"; }
+
+            editor.style.display = "block";
+            editor.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- SAVE DATA ---
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            if (!currentDocId) return;
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "Saving Data...";
+            btn.style.opacity = "0.7";
 
             try {
-                // Construct the updated data object
-                const updatedData = {
-                    status: document.getElementById('editStatus').value,
-                    projectName: document.getElementById('editProjectName').value,
-                    estDelivery: document.getElementById('editEstDelivery').value,
-                    clientVibePref: document.getElementById('editVibe').value,
+                await updateDoc(doc(db, "applications", currentDocId), {
+                    clientName: document.getElementById('eName').value,
+                    clientEmail: document.getElementById('eEmail').value,
+                    status: document.getElementById('eStatus').value,
+                    projectName: document.getElementById('eProjectName').value,
+                    estDelivery: document.getElementById('eDate').value,
+                    clientVibePref: document.getElementById('eVibe').value,
                     colors: {
-                        primary: document.getElementById('editPrimary').value,
-                        secondary: document.getElementById('editSecondary').value,
-                        background: document.getElementById('editBackground').value
+                        primary: document.getElementById('eColorPri').value,
+                        secondary: document.getElementById('eColorSec').value,
+                        background: document.getElementById('eColorBg').value
                     },
-                    clientCustomNotes: document.getElementById('editNotes').value,
-                    assetDownloadUrl: document.getElementById('editAssetUrl').value
-                };
-
-                // Update the document in Firestore
-                await updateDoc(doc(db, "applications", currentEditingDocId), updatedData);
-                
-                saveBtn.innerText = "✅ Saved Successfully!";
-                saveBtn.style.background = "#10b981";
-
-                // Refresh the bird's eye grid if it's open
-                if(document.getElementById('allProjectsGrid').style.display === "grid") {
-                    document.getElementById('loadAllBtn').click();
-                }
-
-                // Reset button text after 2 seconds
-                setTimeout(() => {
-                    saveBtn.innerText = "Save All Changes to Database";
-                }, 2000);
-
-            } catch (error) {
-                console.error("Error updating document: ", error);
-                alert("Failed to save changes. Check console.");
-                saveBtn.innerText = "Save All Changes to Database";
-            }
-            
-            saveBtn.disabled = false;
-        });
-
-        // --- LOGIC 4: PORTFOLIO ADDER ---
-        document.getElementById('addProjectBtn').addEventListener('click', async () => {
-            const name = document.getElementById('siteName').value.trim();
-            const url = document.getElementById('siteUrl').value.trim();
-            
-            if(!name || !url) return alert("Fill both Name and URL");
-
-            try {
-                await addDoc(collection(db, "portfolio"), {
-                    name: name,
-                    url: url,
-                    score: "--",
-                    lastUpdated: new Date()
+                    assetDownloadUrl: document.getElementById('eAssetUrl').value,
+                    clientCustomNotes: document.getElementById('eNotes').value
                 });
-                alert("Project Added to Portfolio!");
-                document.getElementById('siteName').value = "";
-                document.getElementById('siteUrl').value = "";
-            } catch (e) {
-                console.error(e);
+
+                btn.innerText = "✅ Saved Successfully!";
+                setTimeout(() => { btn.innerText = "💾 Save All Client Changes"; btn.style.opacity = "1"; }, 2000);
+                
+                // Refresh grid to show new names/emails
+                loadBtn.click();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to save. Check permissions.");
+                btn.innerText = "💾 Save All Client Changes";
+                btn.style.opacity = "1";
             }
         });
+
+        // Load grid automatically on page open
+        window.onload = () => loadBtn.click();
     </script>
 </body>
 </html>

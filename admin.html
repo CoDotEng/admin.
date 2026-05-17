@@ -133,6 +133,7 @@
                     <option value="5. Development & Coding">5. Development & Coding</option>
                     <option value="6. Final Testing & QA">6. Final Testing & QA</option>
                     <option value="7. Live & Deployed">7. Live & Deployed</option>
+                    <option value="Rejected">❌ Rejected</option>
                 </select>
             </div>
             <button id="quickUpdateBtn" class="btn-save" style="width: auto; padding: 0.8rem 2rem; margin-top: 0;">Update Ticket</button>
@@ -175,6 +176,7 @@
                             <option value="5. Development & Coding">5. Development & Coding</option>
                             <option value="6. Final Testing & QA">6. Final Testing & QA</option>
                             <option value="7. Live & Deployed">7. Live & Deployed</option>
+                            <option value="Rejected">❌ Rejected</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -307,6 +309,12 @@
                         const cleanStatus = statusRaw.split('. ')[1] || statusRaw;
                         const projName = data.projectName || "Pending Setup";
 
+                        // Apply red styling if the project is rejected
+                        let pillStyle = "background: rgba(255,255,255,0.1);";
+                        if (statusRaw === "Rejected") {
+                            pillStyle = "background: rgba(239, 68, 68, 0.2); color: var(--error); border: 1px solid var(--error);";
+                        }
+
                         const card = document.createElement('div');
                         card.className = "client-card";
                         card.innerHTML = `
@@ -316,7 +324,7 @@
                             </div>
                             <span class="client-email">${email}</span>
                             <div style="margin-bottom: 10px; font-size: 0.85rem; color: var(--text-muted);">Project: <span style="color: var(--text-main);">${projName}</span></div>
-                            <div class="status-pill">${cleanStatus}</div>
+                            <div class="status-pill" style="${pillStyle}">${cleanStatus}</div>
                         `;
 
                         card.addEventListener('click', () => loadEditor(id, data));

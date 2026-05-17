@@ -25,14 +25,13 @@
         }
 
         .admin-wrapper {
-            width: 100%; max-width: 1000px; /* Made wider for better data display */
+            width: 100%; max-width: 1000px;
         }
 
         .header { text-align: center; margin-bottom: 3rem; }
         .header h1 { font-family: 'Space Grotesk', sans-serif; color: var(--accent); font-size: 2.5rem; margin: 0 0 0.5rem 0; }
         .header p { color: var(--text-muted); margin: 0; }
 
-        /* --- DASHBOARD CARDS --- */
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; }
         .dashboard-header h2 { font-family: 'Space Grotesk', sans-serif; margin: 0; font-size: 1.5rem; }
         
@@ -43,6 +42,15 @@
         }
         .btn-action:hover { background: var(--accent); color: var(--bg-color); box-shadow: 0 0 15px rgba(0,229,255,0.3); }
 
+        /* --- QUICK TICKET UPDATER --- */
+        .quick-updater {
+            background: rgba(0, 229, 255, 0.03); border: 1px solid var(--accent); border-radius: 8px; padding: 1.5rem;
+            margin-bottom: 3rem; display: flex; gap: 1rem; align-items: flex-end;
+        }
+        .quick-updater .form-group { margin-bottom: 0; flex: 1; }
+        #quickUpdateMsg { width: 100%; text-align: right; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; height: 20px; }
+
+        /* --- DASHBOARD CARDS --- */
         #projectsGrid {
             display: none; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 3rem;
             animation: fadeIn 0.4s ease;
@@ -64,13 +72,9 @@
         /* --- EDITOR SECTION --- */
         #editorWrapper { display: none; animation: fadeIn 0.4s ease; }
         
-        .editor-layout {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;
-        }
+        .editor-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
 
-        .editor-panel {
-            background: var(--surface-color); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem;
-        }
+        .editor-panel { background: var(--surface-color); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
         .editor-panel h3 { font-family: 'Space Grotesk', sans-serif; color: var(--accent); margin: 0 0 1.5rem 0; font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
 
         .form-group { margin-bottom: 1.2rem; }
@@ -92,14 +96,15 @@
         }
         .btn-save:hover { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); transform: translateY(-2px); }
 
-        .email-link {
-            display: inline-block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 600;
-        }
+        .email-link { display: inline-block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--accent); text-decoration: none; font-weight: 600; }
         .email-link:hover { text-decoration: underline; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @media (max-width: 768px) { .editor-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { 
+            .editor-layout { grid-template-columns: 1fr; } 
+            .quick-updater { flex-direction: column; align-items: stretch; }
+        }
     </style>
 </head>
 <body>
@@ -109,6 +114,30 @@
             <h1>CODOT Command Center</h1>
             <p>Manage clients, update statuses, and access project data efficiently.</p>
         </div>
+
+        <div class="dashboard-header">
+            <h2>Fast Status Update</h2>
+        </div>
+        <div class="quick-updater">
+            <div class="form-group">
+                <label>Ticket ID</label>
+                <input type="text" id="quickTicketID" placeholder="e.g. CO-A1B2C3" style="border-color: var(--accent);">
+            </div>
+            <div class="form-group">
+                <label>New Phase</label>
+                <select id="quickStatus">
+                    <option value="1. Application Under Review">1. Application Under Review</option>
+                    <option value="2. Awaiting Preferences & Assets">2. Awaiting Preferences & Assets</option>
+                    <option value="3. Preferences Received & Planning">3. Preferences Received & Planning</option>
+                    <option value="4. Design & UI Prototyping">4. Design & UI Prototyping</option>
+                    <option value="5. Development & Coding">5. Development & Coding</option>
+                    <option value="6. Final Testing & QA">6. Final Testing & QA</option>
+                    <option value="7. Live & Deployed">7. Live & Deployed</option>
+                </select>
+            </div>
+            <button id="quickUpdateBtn" class="btn-save" style="width: auto; padding: 0.8rem 2rem; margin-top: 0;">Update Ticket</button>
+        </div>
+        <div id="quickUpdateMsg"></div>
 
         <div class="dashboard-header">
             <h2>Active Client Roster</h2>
@@ -125,21 +154,17 @@
             </div>
 
             <div class="editor-layout">
-                
                 <div class="editor-panel">
                     <h3>Client Identity & Status</h3>
-                    
                     <div class="form-group">
                         <label>Client Name</label>
                         <input type="text" id="eName" placeholder="Client Name">
                     </div>
-                    
                     <div class="form-group">
                         <label>Client Email</label>
                         <input type="email" id="eEmail" placeholder="client@email.com">
                         <a href="#" id="eEmailLink" class="email-link">📧 Send Email</a>
                     </div>
-
                     <div class="form-group" style="margin-top: 2rem;">
                         <label>Current Phase (Status)</label>
                         <select id="eStatus">
@@ -152,12 +177,10 @@
                             <option value="7. Live & Deployed">7. Live & Deployed</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label>Project Display Name</label>
                         <input type="text" id="eProjectName" placeholder="e.g. Gravity Research Landing">
                     </div>
-
                     <div class="form-group">
                         <label>Estimated Delivery Date</label>
                         <input type="text" id="eDate" placeholder="e.g. Nov 14, 2026">
@@ -166,12 +189,10 @@
 
                 <div class="editor-panel">
                     <h3>Brand & Design Assets</h3>
-                    
                     <div class="form-group">
                         <label>Design Vibe Preference</label>
                         <input type="text" id="eVibe" placeholder="e.g. Minimalist, Dark Mode">
                     </div>
-
                     <div class="form-group">
                         <label>Brand Colors (Hex)</label>
                         <div class="flex-inputs">
@@ -180,19 +201,16 @@
                             <input type="text" id="eColorBg" placeholder="Background">
                         </div>
                     </div>
-
                     <div class="form-group" style="margin-top: 2rem;">
                         <label>Drive / Asset URL</label>
                         <input type="text" id="eAssetUrl" placeholder="https://drive.google.com/...">
                         <a href="#" id="eAssetLink" class="email-link" target="_blank" style="display:none; color: var(--warning);">📁 Open Client Assets</a>
                     </div>
-
                     <div class="form-group">
                         <label>Internal Admin Notes</label>
                         <textarea id="eNotes" placeholder="Any special requests or details..."></textarea>
                     </div>
                 </div>
-
             </div>
 
             <button id="saveBtn" class="btn-save">💾 Save All Client Changes</button>
@@ -202,7 +220,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, updateDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD0PjmGveJ_QS4s3S0wFwiDjxdeE4tRKzw",
@@ -221,6 +239,50 @@
         const loadBtn = document.getElementById('loadBtn');
         const grid = document.getElementById('projectsGrid');
         const editor = document.getElementById('editorWrapper');
+        const quickMsg = document.getElementById('quickUpdateMsg');
+
+        // --- QUICK TICKET UPDATER LOGIC ---
+        document.getElementById('quickUpdateBtn').addEventListener('click', async () => {
+            const ticketInput = document.getElementById('quickTicketID').value.trim().toUpperCase();
+            const newStatus = document.getElementById('quickStatus').value;
+            
+            if(!ticketInput) {
+                quickMsg.innerText = "Please enter a Ticket ID.";
+                quickMsg.style.color = "var(--error)";
+                return;
+            }
+
+            quickMsg.innerText = "Searching database...";
+            quickMsg.style.color = "var(--text-muted)";
+
+            try {
+                const q = query(collection(db, "applications"), where("ticketID", "==", ticketInput));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    quickMsg.innerText = "❌ Ticket not found!";
+                    quickMsg.style.color = "var(--error)";
+                    return;
+                }
+
+                querySnapshot.forEach(async (documentSnapshot) => {
+                    await updateDoc(doc(db, "applications", documentSnapshot.id), { status: newStatus });
+                    quickMsg.innerText = "✅ Status Updated Successfully!";
+                    quickMsg.style.color = "var(--success)";
+                    
+                    // Clear the input and auto-refresh the grid
+                    document.getElementById('quickTicketID').value = '';
+                    loadBtn.click();
+                    
+                    // Clear message after 3 seconds
+                    setTimeout(() => { quickMsg.innerText = ""; }, 3000);
+                });
+            } catch (e) {
+                quickMsg.innerText = "Error. Check console.";
+                quickMsg.style.color = "var(--error)";
+                console.error(e);
+            }
+        });
 
         // --- LOAD ROSTER ---
         loadBtn.addEventListener('click', async () => {
@@ -238,7 +300,6 @@
                         const data = docSnap.data();
                         const id = docSnap.id;
                         
-                        // Extract Data safely
                         const name = data.clientName || "Unnamed Client";
                         const email = data.clientEmail || "No Email Provided";
                         const ticket = data.ticketID || "NO-TICKET";
@@ -246,7 +307,6 @@
                         const cleanStatus = statusRaw.split('. ')[1] || statusRaw;
                         const projName = data.projectName || "Pending Setup";
 
-                        // Create Card
                         const card = document.createElement('div');
                         card.className = "client-card";
                         card.innerHTML = `
@@ -259,9 +319,7 @@
                             <div class="status-pill">${cleanStatus}</div>
                         `;
 
-                        // Load data into editor on click
                         card.addEventListener('click', () => loadEditor(id, data));
-                        
                         grid.appendChild(card);
                     });
                 }
@@ -277,11 +335,9 @@
         function loadEditor(docId, data) {
             currentDocId = docId;
             
-            // Header Info
             document.getElementById('editorTitle').innerHTML = `Editing: <span style="color: var(--accent)">${data.clientName || 'Unnamed Client'}</span>`;
             document.getElementById('editorTicket').innerText = data.ticketID || "NO-TICKET";
 
-            // Populate Form
             document.getElementById('eName').value = data.clientName || "";
             document.getElementById('eEmail').value = data.clientEmail || "";
             document.getElementById('eStatus').value = data.status || "1. Application Under Review";
@@ -294,7 +350,6 @@
             document.getElementById('eAssetUrl').value = data.assetDownloadUrl || "";
             document.getElementById('eNotes').value = data.clientCustomNotes || "";
 
-            // Dynamic Links
             const emailLink = document.getElementById('eEmailLink');
             if(data.clientEmail) {
                 emailLink.href = `mailto:${data.clientEmail}`;
@@ -338,7 +393,6 @@
                 btn.innerText = "✅ Saved Successfully!";
                 setTimeout(() => { btn.innerText = "💾 Save All Client Changes"; btn.style.opacity = "1"; }, 2000);
                 
-                // Refresh grid to show new names/emails
                 loadBtn.click();
             } catch (err) {
                 console.error(err);

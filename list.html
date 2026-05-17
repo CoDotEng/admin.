@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODOT | Master List</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --surface-color: #121212;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent: #00e5ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --border: rgba(255,255,255,0.08);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main);
+            margin: 0; padding: 40px 20px; display: flex; justify-content: center; min-height: 100vh;
+        }
+
+        .admin-wrapper {
+            width: 100%; max-width: 1200px;
+        }
+
+        /* --- HEADER --- */
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
+        .header h1 { font-family: 'Space Grotesk', sans-serif; color: var(--accent); font-size: 2.5rem; margin: 0 0 0.5rem 0; }
+        .header p { color: var(--text-muted); margin: 0; }
+        
+        .nav-links a { color: var(--text-main); text-decoration: none; font-weight: 600; font-family: 'Space Grotesk', sans-serif; background: rgba(255,255,255,0.05); padding: 0.8rem 1.5rem; border-radius: 6px; border: 1px solid var(--border); transition: all 0.2s; }
+        .nav-links a:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* --- CONTROLS --- */
+        .controls-bar {
+            display: flex; gap: 1.5rem; background: var(--surface-color); padding: 1.5rem; 
+            border-radius: 8px; border: 1px solid var(--border); margin-bottom: 2rem; align-items: center;
+        }
+        
+        .filter-group { flex-grow: 1; display: flex; align-items: center; gap: 1rem; }
+        .filter-group label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; }
+        
+        select, input {
+            padding: 0.8rem 1rem; background: var(--bg-color); color: var(--text-main);
+            border: 1px solid var(--border); border-radius: 4px; font-family: 'Inter', sans-serif;
+            outline: none; min-width: 250px;
+        }
+        select:focus, input:focus { border-color: var(--accent); }
+
+        .stat-badge {
+            background: rgba(0, 229, 255, 0.1); color: var(--accent); border: 1px solid var(--accent);
+            padding: 0.5rem 1rem; border-radius: 6px; font-family: 'Space Grotesk', sans-serif; font-weight: bold;
+        }
+
+        /* --- DATA TABLE --- */
+        .table-container {
+            background: var(--surface-color); border: 1px solid var(--border); border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { 
+            background: rgba(255,255,255,0.02); padding: 1.2rem 1.5rem; font-family: 'Space Grotesk', sans-serif; 
+            color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border);
+        }
+        td { padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        tr:last-child td { border-bottom: none; }
+
+        .client-cell strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; color: var(--text-main); margin-bottom: 0.2rem; }
+        .client-cell span { font-size: 0.8rem; color: var(--text-muted); }
+        
+        .ticket-id { font-size: 0.75rem; color: var(--accent); background: rgba(0,229,255,0.1); padding: 3px 8px; border-radius: 4px; letter-spacing: 1px; font-weight: 600; }
+        
+        .status-pill { display: inline-block; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; font-weight: 600; }
+        .status-active { background: rgba(255,255,255,0.1); color: var(--text-main); }
+        .status-rejected { background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid var(--error); }
+        .status-done { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); }
+
+        #loadingMsg { padding: 3rem; text-align: center; color: var(--text-muted); font-family: 'Space Grotesk', sans-serif; }
+
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        
+        <div class="header">
+            <div>
+                <h1>Master Application List</h1>
+                <p>Filter, search, and audit all client applications.</p>
+            </div>
+            <div class="nav-links">
+                <a href="admin.html">← Back to Editor</a>
+            </div>
+        </div>
+
+        <div class="controls-bar">
+            <div class="filter-group">
+                <label>Filter by Phase</label>
+                <select id="statusFilter">
+                    <option value="ALL">All Applications</option>
+                    <option value="1. Application Under Review">Phase 1: Application Under Review</option>
+                    <option value="2. Awaiting Preferences & Assets">Phase 2: Awaiting Preferences</option>
+                    <option value="3. Preferences Received & Planning">Phase 3: Planning</option>
+                    <option value="4. Design & UI Prototyping">Phase 4: Design & Prototyping</option>
+                    <option value="5. Development & Coding">Phase 5: Development</option>
+                    <option value="6. Final Testing & QA">Phase 6: Testing & QA</option>
+                    <option value="7. Live & Deployed">Phase 7: Live & Deployed</option>
+                    <option value="Rejected">❌ Rejected</option>
+                </select>
+            </div>
+            <div class="filter-group" style="flex-grow: 0;">
+                <input type="text" id="searchInput" placeholder="Search Ticket ID or Name..." style="min-width: 200px;">
+            </div>
+            <div class="stat-badge" id="recordCount">Loading...</div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Client Details</th>
+                        <th>Project Name</th>
+                        <th>Current Status</th>
+                        <th>Est. Delivery</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="5" id="loadingMsg">Syncing with database...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0PjmGveJ_QS4s3S0wFwiDjxdeE4tRKzw",
+            authDomain: "codot-agency.firebaseapp.com",
+            projectId: "codot-agency",
+            storageBucket: "codot-agency.firebasestorage.app",
+            messagingSenderId: "22678307444",
+            appId: "1:22678307444:web:59c72496bad5db86b3c721"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let allApplications = []; 
+        const tableBody = document.getElementById('tableBody');
+        const statusFilter = document.getElementById('statusFilter');
+        const searchInput = document.getElementById('searchInput');
+        const recordCount = document.getElementById('recordCount');
+
+        // Initial Data Fetch
+        async function fetchApplications() {
+            try {
+                const snapshot = await getDocs(collection(db, "applications"));
+                allApplications = [];
+                snapshot.forEach(doc => {
+                    allApplications.push({ id: doc.id, ...doc.data() });
+                });
+                renderTable(allApplications);
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--error);">Failed to load database. Check console.</td></tr>`;
+            }
+        }
+
+        // Render Logic
+        function renderTable(dataArray) {
+            tableBody.innerHTML = "";
+            recordCount.innerText = `${dataArray.length} Records`;
+
+            if (dataArray.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 3rem; color:var(--text-muted);">No applications found for this filter.</td></tr>`;
+                return;
+            }
+
+            dataArray.forEach(data => {
+                const tr = document.createElement('tr');
+                
+                // Fallbacks
+                const name = data.clientName || "Unnamed Client";
+                const email = data.clientEmail || "--";
+                const ticket = data.ticketID || "N/A";
+                const project = data.projectName || "Pending Setup";
+                const delivery = data.estDelivery || "TBD";
+                const rawStatus = data.status || "1. Application Under Review";
+                
+                // Status Styling Logic
+                let cleanStatus = rawStatus.includes('. ') ? rawStatus.split('. ')[1] : rawStatus;
+                let pillClass = "status-active";
+                if (rawStatus === "Rejected") { pillClass = "status-rejected"; cleanStatus = "Rejected"; }
+                if (rawStatus.includes("7.")) { pillClass = "status-done"; }
+
+                tr.innerHTML = `
+                    <td><span class="ticket-id">${ticket}</span></td>
+                    <td class="client-cell">
+                        <strong>${name}</strong>
+                        <span>${email}</span>
+                    </td>
+                    <td style="color: var(--text-main); font-weight: 600;">${project}</td>
+                    <td><span class="status-pill ${pillClass}">${cleanStatus}</span></td>
+                    <td style="color: var(--text-muted); font-size: 0.9rem;">${delivery}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Filtering Logic
+        function applyFilters() {
+            const selectedStatus = statusFilter.value;
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            const filteredData = allApplications.filter(app => {
+                // Check Status Match
+                const statusMatch = selectedStatus === "ALL" || app.status === selectedStatus;
+                
+                // Check Search Match (Checks Name, Email, and Ticket ID)
+                const nameMatch = (app.clientName || "").toLowerCase().includes(searchTerm);
+                const emailMatch = (app.clientEmail || "").toLowerCase().includes(searchTerm);
+                const ticketMatch = (app.ticketID || "").toLowerCase().includes(searchTerm);
+                const textMatch = nameMatch || emailMatch || ticketMatch;
+
+                return statusMatch && textMatch;
+            });
+
+            renderTable(filteredData);
+        }
+
+        // Event Listeners
+        statusFilter.addEventListener('change', applyFilters);
+        searchInput.addEventListener('keyup', applyFilters);
+
+        // Run on load
+        fetchApplications();
+    </script>
+</body>
+</html>

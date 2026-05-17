@@ -34,7 +34,7 @@
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.05); 
             width: 100%; 
-            max-width: 700px;
+            max-width: 800px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
@@ -48,7 +48,7 @@
 
         h3 {
             font-family: 'Space Grotesk', sans-serif;
-            margin-top: 2rem;
+            margin-top: 2.5rem;
             font-size: 1.2rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 10px;
@@ -74,7 +74,7 @@
             letter-spacing: 1px;
         }
         
-        input, select {
+        input, select, textarea {
             width: 100%; 
             padding: 1rem; 
             background: var(--bg-color); 
@@ -84,10 +84,13 @@
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
         }
 
-        input:focus, select:focus {
+        textarea { resize: vertical; min-height: 100px; }
+
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--accent);
         }
@@ -117,6 +120,16 @@
             border: 1px solid var(--accent); 
             color: var(--accent);
         }
+        
+        .btn-save {
+            background: var(--success);
+            color: #fff;
+            margin-top: 15px;
+        }
+
+        .btn-save:hover {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); 
+        }
 
         #message { 
             margin-top: 1rem; 
@@ -126,7 +139,7 @@
             min-height: 24px;
         }
 
-        /* --- NEW: BIRD'S EYE DASHBOARD GRID --- */
+        /* --- DASHBOARD GRID --- */
         #allProjectsGrid {
             display: none; 
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -142,7 +155,6 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
         }
 
         .project-card:hover {
@@ -169,12 +181,12 @@
             font-weight: 600;
         }
 
-        /* --- CLIENT DATA VIEWER STYLES --- */
+        /* --- MASTER EDITOR --- */
         .flex-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .flex-row input { margin-bottom: 0; }
         .flex-row button { margin-top: 0; width: 150px; }
 
-        #clientDataDisplay {
+        #editorSection {
             display: none; 
             background: rgba(255,255,255,0.02); 
             border: 1px solid rgba(255,255,255,0.05); 
@@ -184,57 +196,24 @@
             animation: fadeIn 0.3s ease;
         }
 
-        .data-grid {
+        .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 15px;
         }
 
-        .data-item {
-            background: var(--bg-color);
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .data-label {
-            font-size: 0.8rem;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .color-swatch {
+        .asset-link {
             display: inline-block;
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.2);
-            vertical-align: text-bottom;
-            margin-right: 6px;
-        }
-
-        .btn-download {
-            display: block;
-            margin-top: 20px;
-            padding: 12px;
-            background: #ff007f;
-            color: white !important;
-            text-decoration: none;
-            border-radius: 6px;
+            margin-top: 10px;
+            color: var(--accent);
             font-weight: bold;
-            text-align: center;
-            font-family: 'Space Grotesk', sans-serif;
-            transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
-        .btn-download:hover { background: #e60073; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         @media (max-width: 600px) {
-            .data-grid { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
             .flex-row { flex-direction: column; }
             .flex-row button { width: 100%; }
         }
@@ -246,50 +225,78 @@
         <h2>CODOT Admin Panel</h2>
         <p class="subtitle">Control center for projects & performance</p>
         
-        <!-- === SECTION 1: TICKET UPDATER === -->
-        <h3>Ticket Manager (Update Status)</h3>
-        <div class="form-group">
-            <label>Client Ticket ID</label>
-            <input type="text" id="adminTicketID" placeholder="e.g. CO-A1B2C3">
-            
-            <label>New Project Status</label>
-            <select id="newStatus">
-                <option value="1. Application Under Review">1. Application Under Review</option>
-                <option value="2. Awaiting Preferences & Assets">2. Awaiting Preferences & Assets</option>
-                <option value="3. Preferences Received & Planning">3. Preferences Received & Planning</option>
-                <option value="4. Design & UI Prototyping">4. Design & UI Prototyping</option>
-                <option value="5. Development & Coding">5. Development & Coding</option>
-                <option value="6. Final Testing & QA">6. Final Testing & QA</option>
-                <option value="7. Live & Deployed">7. Live & Deployed</option>
-            </select>
-            <button id="updateBtn">Update Ticket Status</button>
-            <div id="message"></div>
-        </div>
-
-        <!-- === SECTION 2: THE BIRD'S-EYE DASHBOARD === -->
-        <h3>Bird's-Eye Dashboard</h3>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Click any project card to automatically pull its details.</p>
+        <h3>Active Projects Dashboard</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Click any project card to pull it into the editor.</p>
         <div class="form-group">
             <button id="loadAllBtn" class="btn-outline">Load All Active Projects</button>
             <div id="allProjectsGrid">
-                <!-- Project cards will be injected here by JS -->
-            </div>
+                </div>
         </div>
 
-        <!-- === SECTION 3: CLIENT DATA VIEWER === -->
-        <h3 id="dataViewerSection">Client Data Viewer (Fetch Assets)</h3>
+        <h3 id="dataViewerSection">Master Project Editor</h3>
         <div class="form-group">
-            <label>Pull Preferences & Files</label>
+            <label>Fetch Client Ticket</label>
             <div class="flex-row">
                 <input type="text" id="viewTicketInput" placeholder="Enter Ticket ID (e.g. CO-XXXXXX)">
                 <button id="fetchDetailsBtn" class="btn-outline">Pull Details</button>
             </div>
+            <div id="fetchMessage" style="text-align: center; font-size: 0.9rem; margin-top: 10px;"></div>
 
-            <!-- This div reveals the data once fetched -->
-            <div id="clientDataDisplay"></div>
+            <div id="editorSection">
+                <div class="grid-2">
+                    <div>
+                        <label>Ticket ID (Read-Only)</label>
+                        <input type="text" id="editTicketID" readonly style="color: var(--accent); border-color: var(--accent); background: rgba(0,229,255,0.05);">
+                    </div>
+                    <div>
+                        <label>Project Status</label>
+                        <select id="editStatus">
+                            <option value="1. Application Under Review">1. Application Under Review</option>
+                            <option value="2. Awaiting Preferences & Assets">2. Awaiting Preferences & Assets</option>
+                            <option value="3. Preferences Received & Planning">3. Preferences Received & Planning</option>
+                            <option value="4. Design & UI Prototyping">4. Design & UI Prototyping</option>
+                            <option value="5. Development & Coding">5. Development & Coding</option>
+                            <option value="6. Final Testing & QA">6. Final Testing & QA</option>
+                            <option value="7. Live & Deployed">7. Live & Deployed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Project Name (For Dashboard)</label>
+                        <input type="text" id="editProjectName" placeholder="e.g. Custom Landing Page">
+                    </div>
+                    <div>
+                        <label>Est. Delivery Date</label>
+                        <input type="text" id="editEstDelivery" placeholder="e.g. Nov 14, 2026">
+                    </div>
+                    <div>
+                        <label>Client Vibe Preference</label>
+                        <input type="text" id="editVibe" placeholder="e.g. Dark, Neon, Minimalist">
+                    </div>
+                    <div>
+                        <label>Primary Color (Hex)</label>
+                        <input type="text" id="editPrimary" placeholder="#00e5ff">
+                    </div>
+                    <div>
+                        <label>Secondary Color (Hex)</label>
+                        <input type="text" id="editSecondary" placeholder="#ffffff">
+                    </div>
+                    <div>
+                        <label>Background Color (Hex)</label>
+                        <input type="text" id="editBackground" placeholder="#050505">
+                    </div>
+                </div>
+
+                <label style="margin-top: 15px;">Asset Download URL</label>
+                <input type="text" id="editAssetUrl" placeholder="https://drive.google.com/...">
+                <a id="currentAssetLink" class="asset-link" href="#" target="_blank" style="display: none;">📁 Open Current Assets</a>
+
+                <label style="margin-top: 15px;">Client Notes / Extras</label>
+                <textarea id="editNotes" placeholder="Client notes go here..."></textarea>
+
+                <button id="saveChangesBtn" class="btn-save">Save All Changes to Database</button>
+            </div>
         </div>
 
-        <!-- === SECTION 4: PORTFOLIO ADDER === -->
         <h3>Portfolio Management</h3>
         <div class="form-group">
             <label>Add New Portfolio Project</label>
@@ -315,44 +322,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- LOGIC 1: TICKET UPDATER ---
-        document.getElementById('updateBtn').addEventListener('click', async () => {
-            const ticketInput = document.getElementById('adminTicketID').value.trim().toUpperCase();
-            const newStatus = document.getElementById('newStatus').value;
-            const messageDiv = document.getElementById('message');
-            
-            if(!ticketInput) return alert("Enter a Ticket ID");
+        // Global variable to track which document we are currently editing
+        let currentEditingDocId = null; 
 
-            messageDiv.innerText = "Searching...";
-            messageDiv.style.color = "var(--text-muted)";
-
-            try {
-                const q = query(collection(db, "applications"), where("ticketID", "==", ticketInput));
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    messageDiv.innerText = "Ticket not found!";
-                    messageDiv.style.color = "var(--error)";
-                    return;
-                }
-
-                querySnapshot.forEach(async (documentSnapshot) => {
-                    await updateDoc(doc(db, "applications", documentSnapshot.id), { status: newStatus });
-                    messageDiv.innerText = "✅ Status Updated Successfully!";
-                    messageDiv.style.color = "var(--success)";
-                    
-                    // Auto-refresh the dashboard if it's open so it shows the new status
-                    if(document.getElementById('allProjectsGrid').style.display === "grid") {
-                        document.getElementById('loadAllBtn').click();
-                    }
-                });
-            } catch (e) {
-                messageDiv.innerText = "Error. Check console.";
-                console.error(e);
-            }
-        });
-
-        // --- LOGIC 2: BIRD'S-EYE DASHBOARD ---
+        // --- LOGIC 1: BIRD'S-EYE DASHBOARD ---
         const loadAllBtn = document.getElementById('loadAllBtn');
         const allProjectsGrid = document.getElementById('allProjectsGrid');
 
@@ -367,30 +340,26 @@
                     allProjectsGrid.innerHTML = `<p style="color: var(--text-muted);">No active projects found.</p>`;
                     allProjectsGrid.style.display = "block";
                 } else {
-                    allProjectsGrid.innerHTML = ""; // Clear out previous load
+                    allProjectsGrid.innerHTML = ""; 
                     allProjectsGrid.style.display = "grid";
 
                     querySnapshot.forEach((docSnap) => {
                         const data = docSnap.data();
                         
-                        // Fallbacks just in case a field is empty
                         const ticketID = data.ticketID || "UNKNOWN-ID";
                         const statusRaw = data.status || "1. Application Under Review";
-                        const vibe = data.clientVibePref || "Awaiting Setup";
-                        
-                        // Clean up the status string to just show the text, not the number
+                        const projectName = data.projectName || "Pending Setup";
                         const cleanStatus = statusRaw.split('. ')[1] || statusRaw;
 
-                        // Create the Card Element
                         const card = document.createElement('div');
                         card.className = "project-card";
                         card.innerHTML = `
                             <h4>${ticketID}</h4>
                             <div class="status-badge">${cleanStatus}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Vibe: <span style="color: var(--text-main);">${vibe}</span></div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Project: <span style="color: var(--text-main);">${projectName}</span></div>
                         `;
 
-                        // Add the "Click to view details" magic hack
+                        // Magic Hack: Click card to load into editor
                         card.addEventListener('click', () => {
                             document.getElementById('viewTicketInput').value = ticketID;
                             document.getElementById('fetchDetailsBtn').click();
@@ -409,10 +378,11 @@
             loadAllBtn.disabled = false;
         });
 
-        // --- LOGIC 3: CLIENT DATA VIEWER ---
+        // --- LOGIC 2: MASTER FETCH & POPULATE EDITOR ---
         const fetchDetailsBtn = document.getElementById('fetchDetailsBtn');
         const viewTicketInput = document.getElementById('viewTicketInput');
-        const clientDataDisplay = document.getElementById('clientDataDisplay');
+        const editorSection = document.getElementById('editorSection');
+        const fetchMessage = document.getElementById('fetchMessage');
 
         fetchDetailsBtn.addEventListener('click', async () => {
             const ticketId = viewTicketInput.value.trim().toUpperCase();
@@ -422,8 +392,10 @@
                 return;
             }
 
-            fetchDetailsBtn.innerText = "Pulling...";
-            fetchDetailsBtn.disabled = true;
+            fetchMessage.innerText = "Pulling data...";
+            fetchMessage.style.color = "var(--text-muted)";
+            editorSection.style.display = "none";
+            currentEditingDocId = null;
 
             try {
                 const q = query(collection(db, "applications"), where("ticketID", "==", ticketId));
@@ -432,62 +404,91 @@
                 if (!querySnapshot.empty) {
                     querySnapshot.forEach((docSnap) => {
                         const data = docSnap.data();
+                        currentEditingDocId = docSnap.id; // Save the unique Firestore ID for updating later
                         
-                        const primary = data.colors?.primary || "N/A";
-                        const secondary = data.colors?.secondary || "N/A";
-                        const bg = data.colors?.background || "N/A";
-                        const vibe = data.clientVibePref || "Not selected yet";
-                        const notes = data.clientCustomNotes || "No extra notes provided.";
-                        const assetUrl = data.assetDownloadUrl || null;
+                        // Populate form fields
+                        document.getElementById('editTicketID').value = data.ticketID || "";
+                        document.getElementById('editStatus').value = data.status || "1. Application Under Review";
+                        document.getElementById('editProjectName').value = data.projectName || "";
+                        document.getElementById('editEstDelivery').value = data.estDelivery || "";
+                        document.getElementById('editVibe').value = data.clientVibePref || "";
+                        document.getElementById('editPrimary').value = data.colors?.primary || "";
+                        document.getElementById('editSecondary').value = data.colors?.secondary || "";
+                        document.getElementById('editBackground').value = data.colors?.background || "";
+                        document.getElementById('editNotes').value = data.clientCustomNotes || "";
+                        document.getElementById('editAssetUrl').value = data.assetDownloadUrl || "";
 
-                        clientDataDisplay.style.display = "block";
-                        clientDataDisplay.innerHTML = `
-                            <div style="margin-bottom: 15px;">
-                                <strong>Ticket:</strong> <span style="color: var(--accent); font-family: 'Space Grotesk', sans-serif;">${data.ticketID}</span>
-                            </div>
-                            
-                            <div class="data-grid">
-                                <div class="data-item">
-                                    <div class="data-label">Selected Vibe</div>
-                                    <div style="font-size: 1.1rem; font-weight: bold; color: var(--text-main);">${vibe}</div>
-                                </div>
-                                
-                                <div class="data-item">
-                                    <div class="data-label">Brand Colors</div>
-                                    <div style="font-size: 0.9rem; margin-bottom: 4px;">
-                                        <span class="color-swatch" style="background-color: ${primary};"></span> Primary: ${primary}
-                                    </div>
-                                    <div style="font-size: 0.9rem; margin-bottom: 4px;">
-                                        <span class="color-swatch" style="background-color: ${secondary};"></span> Secondary: ${secondary}
-                                    </div>
-                                    <div style="font-size: 0.9rem;">
-                                        <span class="color-swatch" style="background-color: ${bg};"></span> Background: ${bg}
-                                    </div>
-                                </div>
-                            </div>
+                        // Handle Asset Link visibility
+                        const assetLink = document.getElementById('currentAssetLink');
+                        if(data.assetDownloadUrl) {
+                            assetLink.href = data.assetDownloadUrl;
+                            assetLink.style.display = "inline-block";
+                        } else {
+                            assetLink.style.display = "none";
+                        }
 
-                            <div class="data-item" style="margin-top: 15px;">
-                                <div class="data-label">Client Notes & Links</div>
-                                <p style="white-space: pre-wrap; font-size: 0.95rem; color: var(--text-main); margin: 0;">${notes}</p>
-                            </div>
-
-                            ${assetUrl 
-                                ? `<a href="${assetUrl}" target="_blank" class="btn-download">📁 Download Client Brand Assets</a>` 
-                                : `<p style="color: var(--error); margin-top: 15px; font-weight: bold; text-align: center;">⚠️ No assets uploaded by client yet.</p>`
-                            }
-                        `;
+                        editorSection.style.display = "block";
+                        fetchMessage.innerText = "✅ Client data loaded successfully.";
+                        fetchMessage.style.color = "var(--success)";
                     });
                 } else {
-                    clientDataDisplay.style.display = "block";
-                    clientDataDisplay.innerHTML = `<p style="color: var(--error); text-align: center;">No application found with Ticket ID: ${ticketId}</p>`;
+                    fetchMessage.innerText = `❌ No application found with Ticket ID: ${ticketId}`;
+                    fetchMessage.style.color = "var(--error)";
                 }
             } catch (error) {
                 console.error("Error fetching data:", error);
-                alert("Failed to fetch data. Check your connection.");
+                fetchMessage.innerText = "Error fetching data. Check your connection.";
+                fetchMessage.style.color = "var(--error)";
             }
+        });
 
-            fetchDetailsBtn.innerText = "Pull Details";
-            fetchDetailsBtn.disabled = false;
+        // --- LOGIC 3: SAVE CHANGES TO FIRESTORE ---
+        document.getElementById('saveChangesBtn').addEventListener('click', async () => {
+            if (!currentEditingDocId) return alert("No active document loaded!");
+
+            const saveBtn = document.getElementById('saveChangesBtn');
+            saveBtn.innerText = "Saving...";
+            saveBtn.disabled = true;
+
+            try {
+                // Construct the updated data object
+                const updatedData = {
+                    status: document.getElementById('editStatus').value,
+                    projectName: document.getElementById('editProjectName').value,
+                    estDelivery: document.getElementById('editEstDelivery').value,
+                    clientVibePref: document.getElementById('editVibe').value,
+                    colors: {
+                        primary: document.getElementById('editPrimary').value,
+                        secondary: document.getElementById('editSecondary').value,
+                        background: document.getElementById('editBackground').value
+                    },
+                    clientCustomNotes: document.getElementById('editNotes').value,
+                    assetDownloadUrl: document.getElementById('editAssetUrl').value
+                };
+
+                // Update the document in Firestore
+                await updateDoc(doc(db, "applications", currentEditingDocId), updatedData);
+                
+                saveBtn.innerText = "✅ Saved Successfully!";
+                saveBtn.style.background = "#10b981";
+
+                // Refresh the bird's eye grid if it's open
+                if(document.getElementById('allProjectsGrid').style.display === "grid") {
+                    document.getElementById('loadAllBtn').click();
+                }
+
+                // Reset button text after 2 seconds
+                setTimeout(() => {
+                    saveBtn.innerText = "Save All Changes to Database";
+                }, 2000);
+
+            } catch (error) {
+                console.error("Error updating document: ", error);
+                alert("Failed to save changes. Check console.");
+                saveBtn.innerText = "Save All Changes to Database";
+            }
+            
+            saveBtn.disabled = false;
         });
 
         // --- LOGIC 4: PORTFOLIO ADDER ---

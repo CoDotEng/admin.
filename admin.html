@@ -305,8 +305,9 @@
                         const data = docSnap.data();
                         const id = docSnap.id;
                         
-                        const name = data.clientName || "Unnamed Client";
-                        const email = data.clientEmail || "No Email Provided";
+                        // FIX: Updated to look for 'email' first
+                        const name = data.clientName || data.name || "Unnamed Client";
+                        const email = data.email || data.clientEmail || "No Email Provided";
                         const ticket = data.ticketID || "NO-TICKET";
                         const statusRaw = data.status || "1. Application Under Review";
                         const cleanStatus = statusRaw.split('. ')[1] || statusRaw;
@@ -346,11 +347,12 @@
         function loadEditor(docId, data) {
             currentDocId = docId;
             
-            document.getElementById('editorTitle').innerHTML = `Editing: <span style="color: var(--accent)">${data.clientName || 'Unnamed Client'}</span>`;
+            document.getElementById('editorTitle').innerHTML = `Editing: <span style="color: var(--accent)">${data.clientName || data.name || 'Unnamed Client'}</span>`;
             document.getElementById('editorTicket').innerText = data.ticketID || "NO-TICKET";
 
-            document.getElementById('eName').value = data.clientName || "";
-            document.getElementById('eEmail').value = data.clientEmail || "";
+            document.getElementById('eName').value = data.clientName || data.name || "";
+            // FIX: Pre-populate using 'email' 
+            document.getElementById('eEmail').value = data.email || data.clientEmail || "";
             document.getElementById('eStatus').value = data.status || "1. Application Under Review";
             document.getElementById('eProjectName').value = data.projectName || "";
             document.getElementById('eDate').value = data.estDelivery || "";
@@ -362,8 +364,9 @@
             document.getElementById('eNotes').value = data.clientCustomNotes || "";
 
             const emailLink = document.getElementById('eEmailLink');
-            if(data.clientEmail) {
-                emailLink.href = `mailto:${data.clientEmail}`;
+            const clientMail = data.email || data.clientEmail;
+            if(clientMail) {
+                emailLink.href = `mailto:${clientMail}`;
                 emailLink.style.display = "inline-block";
             } else { emailLink.style.display = "none"; }
 
@@ -385,9 +388,10 @@
             btn.style.opacity = "0.7";
 
             try {
+                // FIX: Updated database keys to sync perfectly with your client dashboard system
                 await updateDoc(doc(db, "applications", currentDocId), {
                     clientName: document.getElementById('eName').value,
-                    clientEmail: document.getElementById('eEmail').value,
+                    email: document.getElementById('eEmail').value,
                     status: document.getElementById('eStatus').value,
                     projectName: document.getElementById('eProjectName').value,
                     estDelivery: document.getElementById('eDate').value,
